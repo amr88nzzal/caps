@@ -52,6 +52,7 @@ The CAP system should have the following modules:
 ### Test
 
 run `node caps.js` to see the output of your console logs in your terminal.
+![test](./test.png)
 
 ### UML
 
