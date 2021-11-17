@@ -1,16 +1,33 @@
 'use strict';
-const events = require('./events');
-require('./event_mod/driver');
-require('./event_mod/vendor');
+const pickupHandler = require('./handlers/pickup');
+const inTransit = require('./handlers/inTransit');
+const delivered = require('./handlers/delivered');
 
 
-const inTransit = require('./event_handler/inTransit');
-const delivered = require('./event_handler/delivered');
+require('dotenv').config()
+const PORT = process.env.PORT || 3030
+const io = require('socket.io')(PORT);
+io.on('connection', socket => {
+  console.log(`clientID : ${socket.id} ic connected with main system `)
+})
 
-events.on('pickup',(pickup)=>{
-    console.log('CORS : RECEIVED THE PICKUP ORDER');
-    events.emit('pickup-driver',pickup);
-});
-events.on('inTransit',inTransit);
-events.on('delivered',delivered);
+const caps = io.of('/caps'); // namespace
+caps.on('connection', socket => {
+  console.log(`clientID : ${socket.id} ic connected with caps (namespace) `);
 
+  socket.on("pickup", (payload) => {
+    pickupHandler(payload)
+    caps.emit('pickup-d', payload)
+  });
+  socket.on("inTransit", (payload) => {
+    inTransit(payload)
+    caps.emit('delivered-d', payload)
+  });
+ 
+  socket.on("delivered", (payload) => {
+    delivered(payload)
+    caps.emit('delivered-v', payload)
+  });
+ 
+})
+module.exports=caps
