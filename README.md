@@ -2,9 +2,8 @@
 
 ## Author: Amr Nzzal
 
-## ♠ [Pull Request - 01](https://github.com/amr88nzzal/caps/pull/1)
+## ♥ [Pull Request - 02](https://github.com/amr88nzzal/caps/pull/3)
 
-<br/>
 <br/>
 
 ## User Stories
@@ -26,34 +25,45 @@
 
 ### Technical Requirements as described in the lab
 
-The CAP system should have the following modules:
+**In order to switch from Node Events to Socket.io, the refactoring process will involve changes to each application to use the core features of Socket.io.**
 
 <br/>
 
-- `events.js`: Global Event Pool (shared by all modules)
-- `caps.js`: Main Hub Application
-  - Manages the state of every package (ready for pickup, in transit, delivered, etc)
-  - Logs every event to the console with a timestamp and the event payload
-  - i.e. “EVENT {}”
+- As a developer, I want to create network event driven system using Socket.io so that I can write code that responds to events originating from both servers and web applications
+- In order to switch from TCP to Socket.io, the refactoring process will involve changes to each application to use the core features of Socket.io
+- We’ll use one namespace called `caps` where all of our clients (vendors and drivers) will connect
 
-- `vendors.js`: Vendor Module
-  - Declare your store name (perhaps in a .env file, so that this module is re-usable)
-  - Every 5 seconds, simulate a new customer order
-    - Create a fake order, as an object: { storeName, orderId, customerName, address }
-    - Emit a ‘pickup’ event and attach the fake order as payload. **HINT**: Have some fun by using the faker library to make up phony information
-  - Monitor the system for events. Whenever the ‘delivered’ event occurs, Log “thank you” to the console
+- As a developer, I want to create network event driven system using Socket.io so that I can write code that responds to events originating from both servers and web applications
+- In order to switch from TCP to Socket.io, the refactoring process will involve changes to each application to use the core features of Socket.io
+- We’ll use one namespace called `caps` where all of our clients (vendors and drivers) will connect
 
-- `driver.js`: Drivers Module
-  - Monitor the system for events
-  - On the ‘pickup’ event: 
-    - (1) Wait 1 second, (2) Log “DRIVER: picked up [ORDER_ID]” to the console, (3) Emit an ‘in-transit’ event with the payload you received
-    - (1) Wait 3 seconds, (2) Log “delivered” to the console, (3) Emit a ‘delivered’ event with the same payload
+### CAPS Application Server Modifications: 
+- Create and accept connections on a namespace called caps
+- Monitor the correct general events: pickup, in-transit, delivered
+- Broadcast the events and payload back out to the appropriate clients in the caps namespace
+  - Pickup can go out to all sockets (broadcast it) so that the drivers can hear it
+  - In-transit and delivered are meant to be heard only by the right vendor
+
+### Vendor Application:
+- Connects to the CAPS server as a socket.io client to the caps namespace
+- Every .5 seconds, simulate a new customer order
+- Listen for the delivered event coming in from the CAPS server
+
+### Driver Application:
+- Connects to the CAPS server as a socket.io client to the caps namespace
+- Listen for the pickup event coming in from the CAPS server
+- Simulate picking up the package
+- Simulate delivering the package
 
 ### Test
 
-run `node caps.js` to see the output of your console logs in your terminal.
-![test](./test.png)
+- Open 3 tabs and then run each socket from the root of the directory
+  1. `node caps.js`
+  2. `node modules/vendor.js`
+  3. `node modules/driver.js` 
+
+![test](./test12.png)
 
 ### UML
 
-![UML](./uml-11.png)
+![UML](./uml-12.jpg)
